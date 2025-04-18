@@ -69,12 +69,26 @@ public class HouseManager : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+            // Track left-click event
+            Dictionary<string, object> clickEventParams = new Dictionary<string, object>
+            {
+                { "mousePosition", mousePosition },
+                { "canPlace", canPlace }
+            };
+
             if (Input.GetKey(deleteModifierKey))
             {
+                // Telemetry for delete action
+                clickEventParams["action"] = "DeletePrefab";
+                TelemetryManager.Instance.LogEvent("LeftClick", clickEventParams);
                 DeletePrefabUnderMouse();
             }
             else
             {
+                // Telemetry for place action
+                clickEventParams["action"] = canPlace ? "PlacePrefab" : "FailedPlacement";
+                TelemetryManager.Instance.LogEvent("LeftClick", clickEventParams);
+
                 if (canPlace)
                 {
                     PlacePrefab(mousePosition, previewObject.transform.rotation);
@@ -117,7 +131,6 @@ public class HouseManager : MonoBehaviour
             {
                 Destroy(toDelete);
                 GameManager.Instance.CountNonWhitePixels();
-
             }
         }
     }
