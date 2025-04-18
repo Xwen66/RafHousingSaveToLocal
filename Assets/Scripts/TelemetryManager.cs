@@ -3,10 +3,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using System.Text;
+using System;
+using System.IO;
 
 public class TelemetryManager : MonoBehaviour
 {
-   string serverURL = "http://localhost:3000/telemetry";
+    string serverURL = "http://localhost:3000/telemetry";
+    private string telemetryLogPath = "TelemetryLogs.json";
 
     public static TelemetryManager Instance {get;private set;}
 
@@ -31,17 +34,35 @@ public class TelemetryManager : MonoBehaviour
         if(parameters == null)
         {
             parameters = new Dictionary<string, object>();
-
         }
+
+        // Use SessionManager's AuthToken if available
+        string userToken = SessionManager.Instance?.AuthToken ?? "unknown_user";
 
         parameters["eventName"] = eventName;
         parameters["sessionId"] = System.Guid.NewGuid().ToString();
         parameters["deviceTime"] = System.DateTime.UtcNow.ToString("o");
+        parameters["userToken"] = userToken;
 
         eventQueue.Enqueue(parameters);
 
+        // Save locally as JSON
+        SaveTelemetryEventLocally(parameters);
+
         if(!isSending) StartCoroutine(SendEvents());
-        
+    }
+
+    private void SaveTelemetryEventLocally(Dictionary<string, object> parameters)
+    {
+        string json = JsonUtility.ToJson(new SerializationWrapper(parameters));
+        try
+        {
+            File.AppendAllText(telemetryLogPath, json + Environment.NewLine);
+        }
+        catch (Exception e)
+        {
+            Debug.LogError($"Failed to save telemetry event locally: {e.Message}");
+        }
     }
 
     private IEnumerator SendEvents()
@@ -90,12 +111,8 @@ public class TelemetryManager : MonoBehaviour
             foreach(var kvp in parameters)
             {
                 keys.Add(kvp.Key);
-                values.Add(kvp.Value.ToString());
-
+                values.Add(kvp.Value != null ? kvp.Value.ToString() : "null");
             }
         }
     }
-
 }
-
-
