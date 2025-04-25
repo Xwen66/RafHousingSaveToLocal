@@ -69,11 +69,17 @@ public class HouseManager : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
+            // Ensure SessionTracker is initialized before logging
+            SessionTracker.EnsureInitialized();
+
             // Track left-click event
             Dictionary<string, object> clickEventParams = new Dictionary<string, object>
             {
-                { "mousePosition", mousePosition },
-                { "canPlace", canPlace }
+                // Serialize Vector2 as {x, y}
+                { "mousePosition", new Dictionary<string, float> { { "x", mousePosition.x }, { "y", mousePosition.y } } },
+                { "canPlace", canPlace },
+                { "sessionStartTime", SessionTracker.SessionStartTime },
+                { "sessionEndTime", SessionTracker.SessionEndTime }
             };
 
             if (Input.GetKey(deleteModifierKey))

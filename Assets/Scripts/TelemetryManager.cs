@@ -5,6 +5,7 @@ using UnityEngine.Networking;
 using System.Text;
 using System;
 using System.IO;
+using Newtonsoft.Json;
 
 public class TelemetryManager : MonoBehaviour
 {
@@ -36,7 +37,6 @@ public class TelemetryManager : MonoBehaviour
             parameters = new Dictionary<string, object>();
         }
 
-        // Use SessionManager's AuthToken if available
         string userToken = SessionManager.Instance?.AuthToken ?? "unknown_user";
 
         parameters["eventName"] = eventName;
@@ -54,7 +54,7 @@ public class TelemetryManager : MonoBehaviour
 
     private void SaveTelemetryEventLocally(Dictionary<string, object> parameters)
     {
-        string json = JsonUtility.ToJson(new SerializationWrapper(parameters));
+        string json = JsonConvert.SerializeObject(parameters, Formatting.None);
         try
         {
             File.AppendAllText(telemetryLogPath, json + Environment.NewLine);
