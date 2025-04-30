@@ -1,6 +1,7 @@
 using UnityEngine;
 using TMPro;
-using UnityEditor.Search;
+using UnityEngine.SceneManagement;
+
 public class MainMenuManager : MonoBehaviour
 {
     [Header("Sign Up Fields")]
@@ -53,7 +54,10 @@ public class MainMenuManager : MonoBehaviour
             if(!string.IsNullOrEmpty(signResp.token))
             {
                 SessionManager.Instance.SetAuthToken(signResp.token);
-                Debug.Log("Login successfull" + signResp.token);
+                Debug.Log("Login successful" + signResp.token);
+                
+                // Load the Game scene
+                SceneManager.LoadScene(gamesceneName);
             }
             else{
                 Debug.Log("No token in response:" + responseData);
